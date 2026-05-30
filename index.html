@@ -64,6 +64,7 @@
 </head>
 <body>
     <div class="content-wrapper">
+        <!-- Выбор языка -->
         <div id="languageModal" class="lang-modal-overlay">
             <div class="lang-modal">
                 <h2>Choose language / Выберите язык</h2>
@@ -73,6 +74,7 @@
                 </div>
             </div>
         </div>
+
         <header>
             <div class="logo">Roblox Places Hub <span>— без прикрас</span></div>
             <div class="header-lang-switch" id="headerLangSwitch">
@@ -80,6 +82,7 @@
                 <button class="lang-option" data-lang="en">EN</button>
             </div>
         </header>
+
         <main>
             <section class="section">
                 <h2 class="section-title"><span class="emoji">💸</span> <span data-i18n="section_paytowin">Донатные помойки</span></h2>
@@ -93,6 +96,8 @@
                 <h2 class="section-title"><span class="emoji">🌟</span> <span data-i18n="section_good">Живые места</span></h2>
                 <div class="cards-grid" id="cards-good"></div>
             </section>
+
+            <!-- Комментарии -->
             <section class="comments-section">
                 <h2 class="comments-title">💬 Комментарии</h2>
                 <div class="comment-form" id="comment-form">
@@ -105,6 +110,7 @@
                 </div>
             </section>
         </main>
+
         <footer>
             <div class="creator">Создано <a href="https://www.youtube.com/@YT_FlorikHorrors" target="_blank">YT_FlorikHorrors</a></div>
             <div class="telegram-link">Связь: <a href="https://t.me/UnicReactorChernobyl" target="_blank">@UnicReactorChernobyl</a></div>
@@ -114,9 +120,12 @@
 
     <script>
         (function() {
-            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJGLsfeIdTJwAS_aEYIOqUj-QgMewus4bbGmXiRnp3aU6shl-W37Mar5iq7Eyz5Nc5/exec'; // ← замените на ваш актуальный URL
-            const LOCAL_COMMENTS_KEY = 'roblox_local_comments';
+            // ======================
+            // ВАШ НОВЫЙ URL СКРИПТА
+            // ======================
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz97J0rsjotjD5-XHAzH_-fjiVzrfNqS9OZSwzaQQaMWkyBVBPFv95VMF8zcSyXl2Q8Tw/exec';
 
+            // Игры
             const contentData = {
                 ru: {
                     sections: { paytowin: "Донатные помойки", grindy: "Гриндилки", good: "Живые места" },
@@ -226,7 +235,7 @@
                 }
             };
 
-            const STORAGE_KEY = 'roblox_hub_lang_v8';
+            const STORAGE_KEY = 'roblox_hub_lang_v9';
             const modal = document.getElementById('languageModal');
             const headerButtons = document.querySelectorAll('.lang-option');
 
@@ -259,6 +268,7 @@
                         container.appendChild(card);
                     });
                 }
+
                 fillSection('cards-paytowin', data.games.paytowin, 'badge-paytowin');
                 fillSection('cards-grindy', data.games.grindy, 'badge-grindy');
                 fillSection('cards-good', data.games.good, 'badge-good');
@@ -297,7 +307,7 @@
             });
 
             // ======================
-            // ГИБРИДНАЯ СИСТЕМА КОММЕНТАРИЕВ
+            // СИСТЕМА КОММЕНТАРИЕВ (обновлённая)
             // ======================
             const commentsContainer = document.getElementById('comments-container');
             const commentForm = document.getElementById('comment-form');
@@ -305,16 +315,10 @@
             const textInput = document.getElementById('commentText');
             const submitBtn = document.getElementById('submitComment');
 
-            function getLocalComments() {
-                const stored = localStorage.getItem(LOCAL_COMMENTS_KEY);
-                return stored ? JSON.parse(stored) : [];
-            }
-            function saveLocalComments(comments) {
-                localStorage.setItem(LOCAL_COMMENTS_KEY, JSON.stringify(comments));
-            }
             function escapeHtml(text) {
                 return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
             }
+
             function renderComments(comments) {
                 if (!comments.length) {
                     commentsContainer.innerHTML = '<div class="loading-comments">Пока нет комментариев.</div>';
@@ -325,61 +329,71 @@
                     const text = escapeHtml(c.comment || c.text || '');
                     const date = c.timestamp || c.date || '';
                     const formattedDate = date ? new Date(date).toLocaleString() : '';
-                    return `<div class="comment-item"><div class="comment-meta"><span class="comment-author">${name}</span><span>${formattedDate}</span></div><div class="comment-text">${text}</div></div>`;
+                    return `<div class="comment-item">
+                                <div class="comment-meta">
+                                    <span class="comment-author">${name}</span>
+                                    <span>${formattedDate}</span>
+                                </div>
+                                <div class="comment-text">${text}</div>
+                            </div>`;
                 }).join('');
             }
 
             async function loadComments() {
-                commentsContainer.innerHTML = '<div class="loading-comments">Загрузка...</div>';
+                commentsContainer.innerHTML = '<div class="loading-comments">Загрузка комментариев...</div>';
                 try {
-                    const resp = await fetch(SCRIPT_URL + '?action=get');
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        if (data && data.comments) {
-                            renderComments(data.comments);
-                            return;
-                        }
+                    // Добавляем случайный параметр, чтобы обойти кеширование браузером и сервером
+                    const cacheBuster = '&_=' + Date.now();
+                    const resp = await fetch(SCRIPT_URL + '?action=get' + cacheBuster);
+                    if (!resp.ok) throw new Error('Статус ' + resp.status);
+                    const data = await resp.json();
+                    if (data && data.comments) {
+                        renderComments(data.comments);
+                    } else {
+                        renderComments([]);
                     }
-                } catch (e) { console.warn('Сервер недоступен, берём локальные.'); }
-                const local = getLocalComments();
-                renderComments(local);
+                } catch (err) {
+                    console.error('Ошибка загрузки комментариев:', err);
+                    commentsContainer.innerHTML = '<div class="loading-comments">⚠️ Не удалось загрузить комментарии с сервера.</div>';
+                }
             }
 
             async function submitComment() {
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
-                if (!name || !text) { alert('Заполните имя и текст.'); return; }
+                if (!name || !text) {
+                    alert('Пожалуйста, заполните имя и текст комментария.');
+                    return;
+                }
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Отправка...';
-                const newComment = { name: name, comment: text, timestamp: new Date().toISOString() };
-
-                let serverSuccess = false;
                 try {
                     const formData = new URLSearchParams();
                     formData.append('action', 'add');
                     formData.append('name', name);
                     formData.append('comment', text);
+
                     const resp = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: formData.toString()
+                        body: formData
                     });
-                    if (resp.ok) {
-                        const result = await resp.json();
-                        if (result && result.status === 'ok') serverSuccess = true;
+                    if (!resp.ok) throw new Error('Ошибка сервера');
+                    const result = await resp.json();
+                    if (result && result.status === 'ok') {
+                        nameInput.value = '';
+                        textInput.value = '';
+                        // Обновляем список комментариев с сервера
+                        await loadComments();
+                    } else {
+                        alert('Сервер не принял комментарий: ' + (result.message || 'неизвестная ошибка'));
                     }
-                } catch (e) { console.warn('Сервер не ответил, сохраняем локально.'); }
-
-                const localComments = getLocalComments();
-                localComments.push(newComment);
-                saveLocalComments(localComments);
-
-                nameInput.value = '';
-                textInput.value = '';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Отправить';
-                await loadComments();
-                if (!serverSuccess) alert('Сервер временно недоступен, но комментарий сохранён локально и виден вам.');
+                } catch (err) {
+                    console.error('Ошибка отправки:', err);
+                    alert('Не удалось отправить комментарий. Проверьте соединение.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Отправить';
+                }
             }
 
             commentForm.addEventListener('submit', function(e) {
@@ -387,6 +401,7 @@
                 submitComment();
             });
 
+            // Первичная загрузка
             loadComments();
         })();
     </script>
