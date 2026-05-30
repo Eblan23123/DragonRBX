@@ -64,7 +64,6 @@
 </head>
 <body>
     <div class="content-wrapper">
-        <!-- Выбор языка -->
         <div id="languageModal" class="lang-modal-overlay">
             <div class="lang-modal">
                 <h2>Choose language / Выберите язык</h2>
@@ -108,8 +107,8 @@
 
     <script>
         (function() {
-            // ⚠️ ЗАМЕНИТЕ НА ВАШ НОВЫЙ URL ПОСЛЕ РАЗВЁРТЫВАНИЯ
-            const SCRIPT_URL = 'https://script.google.com/macros/s/ВАШ_НОВЫЙ_URL/exec';
+            // ⚠️ НОВЫЙ РАБОЧИЙ URL
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPiKDmmS17FX6Vw3jkMeDZLhKmhjoTlW-SEEGYqYi9RyUGvOCfMQVgMAO0fs1EhjToSA/exec';
 
             const contentData = {
                 ru: {
@@ -220,7 +219,7 @@
                 }
             };
 
-            const STORAGE_KEY = 'roblox_hub_lang_v13';
+            const STORAGE_KEY = 'roblox_hub_lang_final';
             const modal = document.getElementById('languageModal');
             const headerButtons = document.querySelectorAll('.lang-option');
 
@@ -291,7 +290,7 @@
             });
 
             // ======================
-            // КОММЕНТАРИИ (работа с сервером)
+            // КОММЕНТАРИИ
             // ======================
             const commentsContainer = document.getElementById('comments-container');
             const commentForm = document.getElementById('comment-form');
@@ -335,7 +334,7 @@
                         renderComments([]);
                     }
                 } catch (e) {
-                    commentsContainer.innerHTML = '<div class="loading-comments">⚠️ Не удалось загрузить комментарии с сервера.</div>';
+                    commentsContainer.innerHTML = '<div class="loading-comments">⚠️ Сервер недоступен. Комментарии загрузить не удалось.</div>';
                     console.error(e);
                 }
             }
@@ -363,7 +362,7 @@
                     if (result && result.status === 'ok') {
                         nameInput.value = '';
                         textInput.value = '';
-                        await loadComments(); // обновляем список
+                        await loadComments();
                     } else {
                         alert('Комментарий не сохранён.');
                     }
