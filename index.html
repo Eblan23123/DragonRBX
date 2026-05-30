@@ -106,7 +106,7 @@
                     <button class="comment-submit" id="submitComment">Отправить</button>
                 </div>
                 <div class="comments-container" id="comments-container">
-                    <div class="loading-comments">Загрузка комментариев...</div>
+                    <div class="loading-comments">Загрузка...</div>
                 </div>
             </section>
         </main>
@@ -120,12 +120,9 @@
 
     <script>
         (function() {
-            // ======================
-            // ВАШ НОВЫЙ URL СКРИПТА
-            // ======================
+            // ⚠️ Вставьте актуальный URL после развёртывания
             const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz97J0rsjotjD5-XHAzH_-fjiVzrfNqS9OZSwzaQQaMWkyBVBPFv95VMF8zcSyXl2Q8Tw/exec';
 
-            // Игры
             const contentData = {
                 ru: {
                     sections: { paytowin: "Донатные помойки", grindy: "Гриндилки", good: "Живые места" },
@@ -235,7 +232,8 @@
                 }
             };
 
-            const STORAGE_KEY = 'roblox_hub_lang_v9';
+            const STORAGE_KEY = 'roblox_hub_lang_v10';
+            const LOCAL_COMMENTS_KEY = 'roblox_local_comments';
             const modal = document.getElementById('languageModal');
             const headerButtons = document.querySelectorAll('.lang-option');
 
@@ -268,7 +266,6 @@
                         container.appendChild(card);
                     });
                 }
-
                 fillSection('cards-paytowin', data.games.paytowin, 'badge-paytowin');
                 fillSection('cards-grindy', data.games.grindy, 'badge-grindy');
                 fillSection('cards-good', data.games.good, 'badge-good');
@@ -307,7 +304,7 @@
             });
 
             // ======================
-            // СИСТЕМА КОММЕНТАРИЕВ (обновлённая)
+            // КОММЕНТАРИИ (гибрид: сервер + localStorage)
             // ======================
             const commentsContainer = document.getElementById('comments-container');
             const commentForm = document.getElementById('comment-form');
@@ -315,10 +312,16 @@
             const textInput = document.getElementById('commentText');
             const submitBtn = document.getElementById('submitComment');
 
+            function getLocalComments() {
+                const stored = localStorage.getItem(LOCAL_COMMENTS_KEY);
+                return stored ? JSON.parse(stored) : [];
+            }
+            function saveLocalComments(comments) {
+                localStorage.setItem(LOCAL_COMMENTS_KEY, JSON.stringify(comments));
+            }
             function escapeHtml(text) {
                 return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
             }
-
             function renderComments(comments) {
                 if (!comments.length) {
                     commentsContainer.innerHTML = '<div class="loading-comments">Пока нет комментариев.</div>';
@@ -340,60 +343,72 @@
             }
 
             async function loadComments() {
-                commentsContainer.innerHTML = '<div class="loading-comments">Загрузка комментариев...</div>';
+                commentsContainer.innerHTML = '<div class="loading-comments">Загрузка...</div>';
+                // Пробуем загрузить с сервера
                 try {
-                    // Добавляем случайный параметр, чтобы обойти кеширование браузером и сервером
-                    const cacheBuster = '&_=' + Date.now();
-                    const resp = await fetch(SCRIPT_URL + '?action=get' + cacheBuster);
-                    if (!resp.ok) throw new Error('Статус ' + resp.status);
-                    const data = await resp.json();
-                    if (data && data.comments) {
-                        renderComments(data.comments);
-                    } else {
-                        renderComments([]);
+                    const resp = await fetch(SCRIPT_URL + '?action=get&_=' + Date.now());
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data && data.comments) {
+                            renderComments(data.comments);
+                            return;
+                        }
                     }
-                } catch (err) {
-                    console.error('Ошибка загрузки комментариев:', err);
-                    commentsContainer.innerHTML = '<div class="loading-comments">⚠️ Не удалось загрузить комментарии с сервера.</div>';
+                } catch (e) {
+                    console.warn('Сервер недоступен, берём локальные комментарии.');
                 }
+                // Если сервер не ответил – показываем локальные
+                const local = getLocalComments();
+                renderComments(local);
             }
 
             async function submitComment() {
                 const name = nameInput.value.trim();
                 const text = textInput.value.trim();
                 if (!name || !text) {
-                    alert('Пожалуйста, заполните имя и текст комментария.');
+                    alert('Заполните имя и текст.');
                     return;
                 }
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Отправка...';
+                const newComment = {
+                    name: name,
+                    comment: text,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Сохраняем локально в любом случае
+                const localComments = getLocalComments();
+                localComments.push(newComment);
+                saveLocalComments(localComments);
+
+                // Пробуем отправить на сервер
                 try {
                     const formData = new URLSearchParams();
                     formData.append('action', 'add');
                     formData.append('name', name);
                     formData.append('comment', text);
-
                     const resp = await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: formData
                     });
-                    if (!resp.ok) throw new Error('Ошибка сервера');
-                    const result = await resp.json();
-                    if (result && result.status === 'ok') {
-                        nameInput.value = '';
-                        textInput.value = '';
-                        // Обновляем список комментариев с сервера
-                        await loadComments();
-                    } else {
-                        alert('Сервер не принял комментарий: ' + (result.message || 'неизвестная ошибка'));
+                    if (resp.ok) {
+                        const result = await resp.json();
+                        if (result && result.status === 'ok') {
+                            // успешно – просто обновим список с сервера
+                        }
                     }
-                } catch (err) {
-                    console.error('Ошибка отправки:', err);
-                    alert('Не удалось отправить комментарий. Проверьте соединение.');
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Отправить';
+                } catch (e) {
+                    console.warn('Не удалось отправить на сервер, сохранено локально.');
                 }
+
+                nameInput.value = '';
+                textInput.value = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить';
+
+                // Перезагружаем комментарии (с сервера, если доступен, иначе локальные)
+                await loadComments();
             }
 
             commentForm.addEventListener('submit', function(e) {
@@ -401,7 +416,6 @@
                 submitComment();
             });
 
-            // Первичная загрузка
             loadComments();
         })();
     </script>
