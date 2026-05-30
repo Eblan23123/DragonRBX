@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="content-wrapper">
-        <!-- Выбор языка -->
+        <!-- Модалка выбора языка -->
         <div id="languageModal" class="lang-modal-overlay">
             <div class="lang-modal">
                 <h2>Choose language / Выберите язык</h2>
@@ -120,8 +120,9 @@
 
     <script>
         (function() {
-            // ⚠️ Вставьте актуальный URL после развёртывания
+            // ⚠️ Если после развёртывания URL изменился, вставьте новый
             const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz97J0rsjotjD5-XHAzH_-fjiVzrfNqS9OZSwzaQQaMWkyBVBPFv95VMF8zcSyXl2Q8Tw/exec';
+            const LOCAL_COMMENTS_KEY = 'roblox_local_comments';
 
             const contentData = {
                 ru: {
@@ -232,8 +233,7 @@
                 }
             };
 
-            const STORAGE_KEY = 'roblox_hub_lang_v10';
-            const LOCAL_COMMENTS_KEY = 'roblox_local_comments';
+            const STORAGE_KEY = 'roblox_hub_lang_v11';
             const modal = document.getElementById('languageModal');
             const headerButtons = document.querySelectorAll('.lang-option');
 
@@ -304,7 +304,7 @@
             });
 
             // ======================
-            // КОММЕНТАРИИ (гибрид: сервер + localStorage)
+            // КОММЕНТАРИИ (гибрид)
             // ======================
             const commentsContainer = document.getElementById('comments-container');
             const commentForm = document.getElementById('comment-form');
@@ -344,7 +344,6 @@
 
             async function loadComments() {
                 commentsContainer.innerHTML = '<div class="loading-comments">Загрузка...</div>';
-                // Пробуем загрузить с сервера
                 try {
                     const resp = await fetch(SCRIPT_URL + '?action=get&_=' + Date.now());
                     if (resp.ok) {
@@ -355,9 +354,8 @@
                         }
                     }
                 } catch (e) {
-                    console.warn('Сервер недоступен, берём локальные комментарии.');
+                    console.warn('Сервер недоступен, используем локальные комментарии.');
                 }
-                // Если сервер не ответил – показываем локальные
                 const local = getLocalComments();
                 renderComments(local);
             }
@@ -377,12 +375,12 @@
                     timestamp: new Date().toISOString()
                 };
 
-                // Сохраняем локально в любом случае
+                // локально сохраняем всегда
                 const localComments = getLocalComments();
                 localComments.push(newComment);
                 saveLocalComments(localComments);
 
-                // Пробуем отправить на сервер
+                // пытаемся на сервер
                 try {
                     const formData = new URLSearchParams();
                     formData.append('action', 'add');
@@ -395,7 +393,7 @@
                     if (resp.ok) {
                         const result = await resp.json();
                         if (result && result.status === 'ok') {
-                            // успешно – просто обновим список с сервера
+                            // успех
                         }
                     }
                 } catch (e) {
@@ -406,9 +404,7 @@
                 textInput.value = '';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Отправить';
-
-                // Перезагружаем комментарии (с сервера, если доступен, иначе локальные)
-                await loadComments();
+                await loadComments(); // перезагружаем список
             }
 
             commentForm.addEventListener('submit', function(e) {
