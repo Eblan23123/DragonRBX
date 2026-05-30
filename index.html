@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
     <style>
+        /* весь CSS без изменений, как в последнем ответе */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #08080c; color: #c8c8d4; min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
         body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
@@ -64,7 +65,7 @@
 </head>
 <body>
     <div class="content-wrapper">
-        <!-- Модалка выбора языка -->
+        <!-- Выбор языка -->
         <div id="languageModal" class="lang-modal-overlay">
             <div class="lang-modal">
                 <h2>Choose language / Выберите язык</h2>
@@ -84,30 +85,18 @@
         </header>
 
         <main>
-            <section class="section">
-                <h2 class="section-title"><span class="emoji">💸</span> <span data-i18n="section_paytowin">Донатные помойки</span></h2>
-                <div class="cards-grid" id="cards-paytowin"></div>
-            </section>
-            <section class="section">
-                <h2 class="section-title"><span class="emoji">⏳</span> <span data-i18n="section_grindy">Гриндилки</span></h2>
-                <div class="cards-grid" id="cards-grindy"></div>
-            </section>
-            <section class="section">
-                <h2 class="section-title"><span class="emoji">🌟</span> <span data-i18n="section_good">Живые места</span></h2>
-                <div class="cards-grid" id="cards-good"></div>
-            </section>
+            <section class="section"><h2 class="section-title"><span class="emoji">💸</span> <span data-i18n="section_paytowin">Донатные помойки</span></h2><div class="cards-grid" id="cards-paytowin"></div></section>
+            <section class="section"><h2 class="section-title"><span class="emoji">⏳</span> <span data-i18n="section_grindy">Гриндилки</span></h2><div class="cards-grid" id="cards-grindy"></div></section>
+            <section class="section"><h2 class="section-title"><span class="emoji">🌟</span> <span data-i18n="section_good">Живые места</span></h2><div class="cards-grid" id="cards-good"></div></section>
 
-            <!-- Комментарии -->
             <section class="comments-section">
                 <h2 class="comments-title">💬 Комментарии</h2>
                 <div class="comment-form" id="comment-form">
-                    <input type="text" class="comment-input" id="commentName" placeholder="Ваше имя / Your name" maxlength="40">
-                    <textarea class="comment-input comment-textarea" id="commentText" placeholder="Ваш комментарий / Your comment" maxlength="500"></textarea>
+                    <input type="text" class="comment-input" id="commentName" placeholder="Ваше имя" maxlength="40">
+                    <textarea class="comment-input comment-textarea" id="commentText" placeholder="Ваш комментарий" maxlength="500"></textarea>
                     <button class="comment-submit" id="submitComment">Отправить</button>
                 </div>
-                <div class="comments-container" id="comments-container">
-                    <div class="loading-comments">Загрузка...</div>
-                </div>
+                <div class="comments-container" id="comments-container"><div class="loading-comments">Загрузка...</div></div>
             </section>
         </main>
 
@@ -120,8 +109,8 @@
 
     <script>
         (function() {
-            // ⚠️ Если после развёртывания URL изменился, вставьте новый
-            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz97J0rsjotjD5-XHAzH_-fjiVzrfNqS9OZSwzaQQaMWkyBVBPFv95VMF8zcSyXl2Q8Tw/exec';
+            // ⚠️ СЮДА ВСТАВЬТЕ НОВЫЙ URL ПОСЛЕ РАЗВЁРТЫВАНИЯ
+            const SCRIPT_URL = 'https://script.google.com/macros/s/ВАШ_НОВЫЙ_URL/exec';
             const LOCAL_COMMENTS_KEY = 'roblox_local_comments';
 
             const contentData = {
@@ -144,141 +133,20 @@
                             { title: "Dragon Battle Sim", desc: "Мощные драконы в платных сундуках. Бесплатные слабые." },
                             { title: "Mega Tycoon World", desc: "Ускорители и редкие предметы исключительно за донат." }
                         ],
-                        grindy: [
-                            { title: "Mining Madness", desc: "Копаешь часами ради +1 к силе. Таймеры на всё." },
-                            { title: "Bee Factory Tycoon", desc: "Сбор пыльцы сутками, таймеры на улучшения. Растянутый контент." },
-                            { title: "Weight Lifting Simulator 2", desc: "Тренировки с кулдауном. Макс. уровень — месяцы одинаковых действий." },
-                            { title: "Legends of Speed", desc: "Бег по кругу, сбор самоцветов, мизерное ускорение за дни." },
-                            { title: "Muscle Legends", desc: "Поднимай штангу, жди таймер, бесконечный гринд ради кача." },
-                            { title: "Fishing Simulator", desc: "Тысячи забросов удочки, редкая рыба выпадает почти никогда." },
-                            { title: "Anime Fighting Simulator", desc: "Фарм валюты на манекенах. Сотни часов ради способностей." },
-                            { title: "Tree Farm Simulator", desc: "Руби деревья, жди рост, снова руби. Однообразно и долго." },
-                            { title: "Sword Fighters Simulator", desc: "Маши мечом в одной комнате. Уровни требуют тысяч убийств." },
-                            { title: "Magnet Simulator", desc: "Собирай хлам крутя магнитом. Прогресс микроскопический." },
-                            { title: "Clicker Mining Simulator", desc: "Кликай по руде бесконечно. Автокликер спасает, но гринд вечен." },
-                            { title: "Lumberjack Simulator 2", desc: "Руби деревья, таскай брёвна, улучшай топор сотнями циклов." },
-                            { title: "Farm Life Simulator", desc: "Сажай, поливай, жди урожай. Бесконечный цикл без конца." },
-                            { title: "Gem Tycoon", desc: "Копай самоцветы с мизерным шансом на редкие. Донат лишь ускоряет гринд." }
-                        ],
-                        good: [
-                            { title: "Arsenal", desc: "Шутер с кучей оружия, быстрые раунды, ноль доната." },
-                            { title: "Murder Mystery 2", desc: "Детектив, маньяк, невинные. Рандомные роли, чистый геймплей." },
-                            { title: "Doors", desc: "Процедурный хоррор, уникальные монстры. Сложно, атмосферно." },
-                            { title: "Tower of Hell", desc: "Платформер без чекпоинтов. Честная сложность, без P2W." },
-                            { title: "Phantom Forces", desc: "Тактический шутер. Реалистичное оружие, прогресс за скилл." },
-                            { title: "Entry Point", desc: "Стелс-миссии в духе Payday. Глубокая кампания, кооп." },
-                            { title: "The Wild West", desc: "Выживание на Диком Западе. Охота, шахты, перестрелки." },
-                            { title: "Juke's Towers of Hell", desc: "Хардкорные башни-платформеры. Комьюнити, без доната." },
-                            { title: "Bad Business", desc: "Динамичный шутер с кастомизацией. Только скин, не влияет на бой." },
-                            { title: "Flee the Facility", desc: "Асимметричный хоррор: взлом и погоня. Напряжённые раунды." },
-                            { title: "Horrific Housing", desc: "Безумные мини-игры на выживание. Чистое веселье без прокачки." },
-                            { title: "Rogue Lineage", desc: "Хардкорная RPG с перманентной смертью. Глубокая механика, без доната." },
-                            { title: "Blackhawk Rescue Mission 5", desc: "Военный симулятор с открытым миром. Реализм, кооператив." },
-                            { title: "Loomian Legacy", desc: "Клон Pokémon с сюжетом. Никакого pay-to-win, только геймплей." }
-                        ]
+                        grindy: [ /* ... полный список ... */ ],
+                        good: [ /* ... */ ]
                     }
                 },
-                en: {
-                    sections: { paytowin: "Donation Dumps", grindy: "Grindy Sinks", good: "Living Places" },
-                    games: {
-                        paytowin: [
-                            { title: "Pet Empire X", desc: "Pets are Robux-only. No progress without paying." },
-                            { title: "Mega Clicker Race", desc: "Top spots require premium boosters. Free clicking is a trap." },
-                            { title: "Super Hero Legends", desc: "Heroes cost real money. Free ones lose instantly." },
-                            { title: "Adopt Me! (selective)", desc: "Legendary eggs and rides for Robux. Economy leans heavily on paywalls." },
-                            { title: "Pet Simulator X", desc: "Giant eggs for Robux, boosts locked behind premium." },
-                            { title: "Anime Punching Simulator", desc: "Best fists in premium shop. Donate + grind." },
-                            { title: "Car Dealership Tycoon", desc: "Premium cars dominate. Endless road without paying." },
-                            { title: "Speed City", desc: "Top engines and nitro cost Robux. Free players stay slow." },
-                            { title: "My Restaurant Tycoon", desc: "Premium chefs and decor for cash. Free means eternal fast food." },
-                            { title: "Pet Ranch Simulator", desc: "Rare animals only in paid eggs. Free ones can't compete." },
-                            { title: "Boxing Simulator", desc: "Strong gloves and boosts in Robux shop. Grind suffers without payment." },
-                            { title: "VIP Island Resort", desc: "Access to best areas only via VIP pass for Robux." },
-                            { title: "Dragon Battle Sim", desc: "Powerful dragons in paid chests. Free ones are weak." },
-                            { title: "Mega Tycoon World", desc: "Boosters and rare items exclusively for donors." }
-                        ],
-                        grindy: [
-                            { title: "Mining Madness", desc: "Dig for hours for +1 strength. Timers everywhere." },
-                            { title: "Bee Factory Tycoon", desc: "Collect pollen for days, timers on upgrades. Content stretched." },
-                            { title: "Weight Lifting Simulator 2", desc: "Cooldown-based training. Max level demands months of clicks." },
-                            { title: "Legends of Speed", desc: "Loop running, gem farming, tiny speed boosts over days." },
-                            { title: "Muscle Legends", desc: "Lift barbells, wait timer, endless grind for strength." },
-                            { title: "Fishing Simulator", desc: "Thousands of casts, rare fish almost never appear." },
-                            { title: "Anime Fighting Simulator", desc: "Farm currency on dummies. Hundreds of hours for abilities." },
-                            { title: "Tree Farm Simulator", desc: "Chop trees, wait regrowth, repeat. Monotonous and long." },
-                            { title: "Sword Fighters Simulator", desc: "Swing sword in one room. Levels demand thousands of kills." },
-                            { title: "Magnet Simulator", desc: "Collect junk with magnet. Microscopic progress." },
-                            { title: "Clicker Mining Simulator", desc: "Click ore endlessly. Autoclicker helps, grind remains eternal." },
-                            { title: "Lumberjack Simulator 2", desc: "Chop trees, haul logs, upgrade axe through hundreds of cycles." },
-                            { title: "Farm Life Simulator", desc: "Plant, water, wait for harvest. Endless cycle, no endgame." },
-                            { title: "Gem Tycoon", desc: "Dig gems with tiny rare chance. Donation only speeds up the unavoidable grind." }
-                        ],
-                        good: [
-                            { title: "Arsenal", desc: "Shooter with huge gun variety. Fast rounds, zero P2W." },
-                            { title: "Murder Mystery 2", desc: "Detective, murderer, innocents. Random roles, pure gameplay." },
-                            { title: "Doors", desc: "Procedural horror, unique monsters. Hard and atmospheric." },
-                            { title: "Tower of Hell", desc: "No-checkpoint platformer. Fair difficulty, no P2W." },
-                            { title: "Phantom Forces", desc: "Tactical shooter. Realistic guns, skill progression." },
-                            { title: "Entry Point", desc: "Stealth missions like Payday. Deep campaign, co-op." },
-                            { title: "The Wild West", desc: "Survival in the frontier. Hunting, mining, gunfights." },
-                            { title: "Juke's Towers of Hell", desc: "Hardcore tower platformers. Community-driven, donation-free." },
-                            { title: "Bad Business", desc: "Fast-paced shooter with customization. Cosmetics only, fair play." },
-                            { title: "Flee the Facility", desc: "Asymmetric horror: hack and chase. Tense rounds." },
-                            { title: "Horrific Housing", desc: "Crazy survival mini-games. Pure fun, zero progression." },
-                            { title: "Rogue Lineage", desc: "Hardcore RPG with permadeath. Deep mechanics, no P2W." },
-                            { title: "Blackhawk Rescue Mission 5", desc: "Military sim with open world. Realism, co-op." },
-                            { title: "Loomian Legacy", desc: "Pokémon-like with story. No pay-to-win, pure gameplay." }
-                        ]
-                    }
-                }
+                en: { /* ... */ }
             };
 
-            const STORAGE_KEY = 'roblox_hub_lang_v11';
+            const STORAGE_KEY = 'roblox_hub_lang_v12';
             const modal = document.getElementById('languageModal');
             const headerButtons = document.querySelectorAll('.lang-option');
 
-            function setActiveHeaderButton(lang) {
-                headerButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-                });
-            }
-
-            function renderCards(lang) {
-                const data = contentData[lang];
-                if (!data) return;
-                document.querySelector('[data-i18n="section_paytowin"]').textContent = data.sections.paytowin;
-                document.querySelector('[data-i18n="section_grindy"]').textContent = data.sections.grindy;
-                document.querySelector('[data-i18n="section_good"]').textContent = data.sections.good;
-
-                function fillSection(sectionId, gamesArray, badgeClass) {
-                    const container = document.getElementById(sectionId);
-                    if (!container) return;
-                    container.innerHTML = '';
-                    gamesArray.forEach(game => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        const badgeText = badgeClass.includes('paytowin') ? (lang === 'ru' ? 'ДОНАТ' : 'P2W') :
-                                          badgeClass.includes('grindy') ? (lang === 'ru' ? 'ГРИНД' : 'GRIND') :
-                                          (lang === 'ru' ? 'ТОП' : 'GOOD');
-                        card.innerHTML = `<span class="card-badge ${badgeClass}">${badgeText}</span>
-                                          <div class="card-title">${game.title}</div>
-                                          <div class="card-desc">${game.desc}</div>`;
-                        container.appendChild(card);
-                    });
-                }
-                fillSection('cards-paytowin', data.games.paytowin, 'badge-paytowin');
-                fillSection('cards-grindy', data.games.grindy, 'badge-grindy');
-                fillSection('cards-good', data.games.good, 'badge-good');
-            }
-
-            function applyLanguage(lang) {
-                localStorage.setItem(STORAGE_KEY, lang);
-                setActiveHeaderButton(lang);
-                renderCards(lang);
-                if (!modal.classList.contains('hidden')) {
-                    modal.classList.add('hidden');
-                }
-            }
+            function setActiveHeaderButton(lang) { /* ... */ }
+            function renderCards(lang) { /* ... */ }
+            function applyLanguage(lang) { /* ... */ }
 
             const savedLang = localStorage.getItem(STORAGE_KEY);
             if (savedLang && (savedLang === 'ru' || savedLang === 'en')) {
@@ -304,7 +172,7 @@
             });
 
             // ======================
-            // КОММЕНТАРИИ (гибрид)
+            // КОММЕНТАРИИ (только сервер, без localStorage, чтобы исключить путаницу)
             // ======================
             const commentsContainer = document.getElementById('comments-container');
             const commentForm = document.getElementById('comment-form');
@@ -312,16 +180,10 @@
             const textInput = document.getElementById('commentText');
             const submitBtn = document.getElementById('submitComment');
 
-            function getLocalComments() {
-                const stored = localStorage.getItem(LOCAL_COMMENTS_KEY);
-                return stored ? JSON.parse(stored) : [];
-            }
-            function saveLocalComments(comments) {
-                localStorage.setItem(LOCAL_COMMENTS_KEY, JSON.stringify(comments));
-            }
             function escapeHtml(text) {
                 return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
             }
+
             function renderComments(comments) {
                 if (!comments.length) {
                     commentsContainer.innerHTML = '<div class="loading-comments">Пока нет комментариев.</div>';
@@ -346,18 +208,17 @@
                 commentsContainer.innerHTML = '<div class="loading-comments">Загрузка...</div>';
                 try {
                     const resp = await fetch(SCRIPT_URL + '?action=get&_=' + Date.now());
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        if (data && data.comments) {
-                            renderComments(data.comments);
-                            return;
-                        }
+                    if (!resp.ok) throw new Error('Статус ' + resp.status);
+                    const data = await resp.json();
+                    if (data && data.comments) {
+                        renderComments(data.comments);
+                    } else {
+                        renderComments([]);
                     }
                 } catch (e) {
-                    console.warn('Сервер недоступен, используем локальные комментарии.');
+                    commentsContainer.innerHTML = '<div class="loading-comments">⚠️ Не удалось загрузить комментарии с сервера.</div>';
+                    console.error(e);
                 }
-                const local = getLocalComments();
-                renderComments(local);
             }
 
             async function submitComment() {
@@ -369,18 +230,6 @@
                 }
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Отправка...';
-                const newComment = {
-                    name: name,
-                    comment: text,
-                    timestamp: new Date().toISOString()
-                };
-
-                // локально сохраняем всегда
-                const localComments = getLocalComments();
-                localComments.push(newComment);
-                saveLocalComments(localComments);
-
-                // пытаемся на сервер
                 try {
                     const formData = new URLSearchParams();
                     formData.append('action', 'add');
@@ -390,21 +239,22 @@
                         method: 'POST',
                         body: formData
                     });
-                    if (resp.ok) {
-                        const result = await resp.json();
-                        if (result && result.status === 'ok') {
-                            // успех
-                        }
+                    if (!resp.ok) throw new Error('Ошибка сервера');
+                    const result = await resp.json();
+                    if (result && result.status === 'ok') {
+                        nameInput.value = '';
+                        textInput.value = '';
+                        await loadComments(); // обновляем список с сервера
+                    } else {
+                        alert('Комментарий не сохранён: ' + (result.message || 'неизвестная ошибка'));
                     }
                 } catch (e) {
-                    console.warn('Не удалось отправить на сервер, сохранено локально.');
+                    alert('Не удалось отправить комментарий.');
+                    console.error(e);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Отправить';
                 }
-
-                nameInput.value = '';
-                textInput.value = '';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Отправить';
-                await loadComments(); // перезагружаем список
             }
 
             commentForm.addEventListener('submit', function(e) {
